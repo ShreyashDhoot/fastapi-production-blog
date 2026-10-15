@@ -1,0 +1,16 @@
+- synchronous code : one thing happens after another like a assembly line 
+- asynchronous code : several things happend parallely and then come together so one process does not wait for other 
+- database responses , netwrok requests , file opening are all i/o bound task and can hold the application process in waiting ,sitting idle
+- These cases are where you can use async 
+- Async does not help with CPU bound tasks such as heavy calculations etc that occupy your whole compute it helps where the task is waiting for someone else to send or receive something
+- If used in unnecessary places the async machinery overhead can even slow the whole application down 
+- In Fast API a simple def is automatic run in a seperate threadpool 
+- prevents function from blocking the event loop 
+- using Async in fastapi the function is run in the main event loop 
+- aiosqlite provides an async driver to sql alchemy so sqlalchemy can perform async tasks 
+-  lazy loading does not work in async sqlalchemy
+-  becos lazy loading requires a synchronous query in an async context 
+-  eager loading is the solution 
+-  can have a hybrid approach of sync and async 
+-  never use blocking or persistant data base session in a async function or the request library 
+-  
