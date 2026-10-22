@@ -4,7 +4,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from typing import Annotated 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession 
 from sqlalchemy.orm import selectinload
 from contextlib import asynccontextmanager
@@ -16,6 +16,7 @@ from routers import posts , users
 
 import models 
 from database import Base , engine , get_db
+from config import settings
 
 #lifespan function startup and shutdown 
 @asynccontextmanager
@@ -41,16 +42,28 @@ app.include_router(posts.router , prefix = "/api/posts" , tags = ["posts"])
 @app.get("/",include_in_schema=False,name="home")
 @app.get("/post",include_in_schema=False,name="posts")
 async def home(request: Request , db : Annotated[AsyncSession ,Depends(get_db)]):
+    count_result = await db.execute(select(func.count()).select_from(models.Post))
+    total = count_result.scalar() or 0
+
     result = await db.execute(
         select(models.Post)
         .options(selectinload(models.Post.author))
         .order_by(models.Post.date_posted.desc())
+        .limit(settings.post_per_page)
         )
     posts = result.scalars().all()
+
+    has_more = len(posts) < total 
+
     return templates.TemplateResponse(
         request,
         "home.html",
-        {"posts":posts ,"title":"Home"},
+        {
+            "posts":posts ,
+            "title":"Home",
+            "limit":settings.post_per_page,
+            "has_more":has_more,
+        },
     )
 
 @app.get("/post/{post_id}", include_in_schema=False)
@@ -83,18 +96,35 @@ async def user_posts_page(
     user = result.scalars().first()
     if not user :
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,details="User not found")
+
+    count_result = await db.execute(
+        select(func.count())
+        .select_from(models.Post)
+        .where(models.Post.user_id ==user.id)
+    )
+
+    total = count_result.scalar() or 0
     
     results = await db.execute(
         select(models.Post)
         .options(selectinload(models.Post.author))
         .where(models.Post.user_id==user_id)
+        .order_by(models.Post.date_posted.desc())
         )
+    
     posts = results.scalars().all()
+
+    has_more = len(posts) < total 
+
     return templates.TemplateResponse(
         request,
         "user_posts.html",
         {
-            "posts":posts,"user":user,"title":f"{user.username}'s Posts"
+            "posts":posts,
+            "user":user,
+            "limit" : settings.post_per_page, 
+            "has_more" : has_more,
+            "title":f"{user.username}'s Posts"
         },
     )
 
