@@ -19,6 +19,7 @@ class User(Base):
         nullable = True,
         default = None,
     )
+    password_hash : Mapped[str] = mapped_column(String(200),nullable=False) #<== 200 == good enough for argon 2 hashes 
 
     posts : Mapped[list[Post]] = relationship(back_populates="author", cascade = "all , delete-orphan")
 
