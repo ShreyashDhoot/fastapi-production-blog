@@ -35,7 +35,7 @@ app.mount("/media",StaticFiles(directory="media"),name="media")
 templates = Jinja2Templates(directory="templates")
 
 app.include_router(users.router , prefix = "/api/users" , tags = ["users"])
-app.include_router(users.router , prefix = "/api/posts" , tags = ["posts"])
+app.include_router(posts.router , prefix = "/api/posts" , tags = ["posts"])
 
 #HTML routes are for human viewing and are NOT needed in API documentation therefore we use include_in_schema=False
 @app.get("/",include_in_schema=False,name="home")
@@ -44,6 +44,7 @@ async def home(request: Request , db : Annotated[AsyncSession ,Depends(get_db)])
     result = await db.execute(
         select(models.Post)
         .options(selectinload(models.Post.author))
+        .order_by(models.Post.date_posted.desc())
         )
     posts = result.scalars().all()
     return templates.TemplateResponse(
@@ -55,10 +56,10 @@ async def home(request: Request , db : Annotated[AsyncSession ,Depends(get_db)])
 @app.get("/post/{post_id}", include_in_schema=False)
 async def post_page(request: Request , post_id : int ,db : Annotated[AsyncSession, Depends(get_db)]):
     results = await db.execute(
-        select(models.post)
+        select(models.Post)
         .options(selectinload(models.Post.author))
         .where(models.Post.id == post_id))
-    post = results.scalar().first()
+    post = results.scalars().first()
     if post:
         title = post.title[:50]
         return templates.TemplateResponse(
@@ -75,7 +76,9 @@ async def user_posts_page(
     db : Annotated[AsyncSession , Depends(get_db)]):
     result = await db.execute(
         select(models.User)
-        .where(models.User.id == user_id))
+        .where(models.User.id == user_id)
+        .order_by(models.Post.date_posted.desc())
+        )
 
     user = result.scalars().first()
     if not user :

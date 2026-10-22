@@ -20,8 +20,8 @@ router = APIRouter()
 
 @router.get("", response_model =list[PostResponse]) #<-- validates that each post follows our post response schemas 
 async def get_posts( db: Annotated[AsyncSession,Depends(get_db)]):
-    results = await db.execute(select(models.Post).options(selectinload(models.Post.author)))
-    posts = results.scalar().all()
+    results = await db.execute(select(models.Post).options(selectinload(models.Post.author)).order_by(models.Post.date_posted.desc()))
+    posts = results.scalars().all()
     return posts
 
 @router.post(
@@ -38,7 +38,7 @@ async def create_post(post:PostCreate, db: Annotated[AsyncSession,Depends(get_db
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            details="User not found"
+            detail="User not found"
         )
 
     new_post = models.Post(
@@ -65,7 +65,7 @@ async def update_post_full(post_id : int , post_data: PostCreate , db : Annotate
     result = await db.execute(select(models.Post).where(models.Post.id==post_id))
     post = result.scalars().first()
     if not post :
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,details = "post not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail = "post not found")
     if post_data.user_id != post.user_id:
         results = await db.execute(select(models.User).where(models.User.id==post.user_id))
         user = results.scalar()
@@ -88,7 +88,7 @@ async def partial_update(post_id : int , post_data : PostUpdate , db : Annotated
     result = await db.execute(select(models.Post).where(models.Post.id==post_id))
     post = result.scalars().first()
     if not post :
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,details = "post not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail = "post not found")
     
     update_data = post_data.model_dump(exclude_unset=True) #<== only changes what is comming in 
     for field , value in update_data.items():
@@ -103,8 +103,8 @@ async def delete_post(post_id : int , db : Annotated[AsyncSession, Depends(get_d
     result = await db.execute(select(models.Post).where(models.Post.id==post_id))
     post = result.scalars().first()
     if not post :
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,details = "post not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail = "post not found")
     
     await db.delete(post)
     await db.commit()
-    return "post is deleted"
+    return HTTPException(status_code=status.HTTP_204_NO_CONTENT, detail = "post has been deleted")
