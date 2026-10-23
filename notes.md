@@ -13,4 +13,7 @@
 -  eager loading is the solution 
 -  can have a hybrid approach of sync and async 
 -  never use blocking or persistant data base session in a async function or the request library 
--  
+-  there is a fastapi pagination library that can be used instead of doing pagination manually 
+- The python built in SMTP package is synchronous which is why we use aiosmtplib 
+- for email sending we need a SMTP server in production we can use services such as syngrid or aws for dev environment we use mailtrapsandbox 
+- JWT cannot be invalidated before they expire which is why we use random database stored tokens . can be invalidated by deleting from the database  

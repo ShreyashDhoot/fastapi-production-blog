@@ -6,11 +6,23 @@ class Settings(BaseSettings):
         env_file = ".env",
         env_file_encoding = "utf-8",
     )
+    # bearer , password and hashing 
     secret_key : SecretStr
     algorithm : str = "HS256"
     access_token_expire_minutes : int = 30
-    max_upload_size_bytes : int = 5 * 1024 * 1024 
+    # Image upload setting 
+    max_upload_size_bytes : int = 5 * 1024 * 1024
+    #Pagination setting  
     post_per_page : int = 10
+    #Password Reset settings 
+    reset_token_expire_minutes :int = 5
+    mail_server:str = "localhost"
+    mail_port :int = 587 
+    mail_username:str = ""
+    mail_password:SecretStr = SecretStr("")
+    mail_from:str="noreply@example.com"
+    mail_use_tls:bool = True 
+    frontend_url : str = "http://localhost:8000"
 
 settings = Settings() # loaded from .env files 
 
