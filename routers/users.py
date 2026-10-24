@@ -56,7 +56,7 @@ router = APIRouter()
 
 async def create_user(user:UserCreate , db: Annotated[AsyncSession,Depends(get_db)]):
     #need to check if user name already exists 
-    result = await db.execute(select(models.User).where(func.lower(models.User.username == user.username)),)
+    result = await db.execute(select(models.User).where(func.lower(models.User.username) == user.username.lower()),)
     existing_user  = result.scalars().first()
 
     if existing_user:
@@ -65,7 +65,7 @@ async def create_user(user:UserCreate , db: Annotated[AsyncSession,Depends(get_d
             detail = "Username already exists",
         )
     
-    result = await db.execute(select(models.User).where(func.lower(models.User.email == user.email)),)
+    result = await db.execute(select(models.User).where(func.lower(models.User.email) == user.email.lower()),)
     existing_user  = result.scalars().first()
 
     if existing_user:
@@ -180,7 +180,7 @@ async def reset_password(
             details = "Invalid or expired reset token"
         )
 
-    if reset_token.expires_at.replace(tzinfo=UTC) < datetime.now(UTC):
+    if reset_token.expires_at < datetime.now(UTC):
         await db.delete(reset_token)
         await db.commit()
         raise HTTPException(
@@ -422,6 +422,7 @@ async def delete_user_picture(
     delete_profile_image(old_filename)
     
     return current_user
+
 
 
 

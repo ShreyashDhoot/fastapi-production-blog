@@ -45,6 +45,9 @@ class Post(Base):
         nullable=False,
         index=True,
     )
+    # For non null columns during migration we must set a server default because for the rows 
+    # before the new schema alembic will try to set it null but null at that place will be invalid 
+    likes : Mapped[int] = mapped_column(Integer, default=0, server_default = "0")
 
     date_posted:Mapped[datetime] = mapped_column(
         DateTime(timezone=True),

@@ -6,6 +6,8 @@ class Settings(BaseSettings):
         env_file = ".env",
         env_file_encoding = "utf-8",
     )
+    #database ur 
+    database_url : str 
     # bearer , password and hashing 
     secret_key : SecretStr
     algorithm : str = "HS256"
