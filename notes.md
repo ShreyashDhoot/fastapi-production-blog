@@ -17,3 +17,5 @@
 - The python built in SMTP package is synchronous which is why we use aiosmtplib 
 - for email sending we need a SMTP server in production we can use services such as syngrid or aws for dev environment we use mailtrapsandbox 
 - JWT cannot be invalidated before they expire which is why we use random database stored tokens . can be invalidated by deleting from the database  
+- problem with local storage for container style deployment is the data is ephemeral once the container restarts the data gets wiped away , makes switching servers and changing services hard 
+- Use object stores such S3 

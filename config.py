@@ -26,5 +26,12 @@ class Settings(BaseSettings):
     mail_use_tls:bool = True 
     frontend_url : str = "http://localhost:8000"
 
+    # AWS settings 
+    aws_s3_bucket_name : str
+    aws_s3_region : str = "us-east-1"
+    aws_access_key :SecretStr | None = None 
+    aws_access_key_secret : SecretStr | None = None 
+    aws_s3_endpoint_url : str | None = None
+
 settings = Settings() # loaded from .env files 
 
