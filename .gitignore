@@ -1,2 +1,17 @@
+# Environment & secrets
 .env
+
+# Virtual Environment
+fastapi-venv/
+venv/
+.venv/
+
+# Python bytecode & cache
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Local media uploads (if any)
+media/
 populate_db.py
