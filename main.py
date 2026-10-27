@@ -4,7 +4,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from typing import Annotated 
-from sqlalchemy import func, select
+from sqlalchemy import func, select ,text
 from sqlalchemy.ext.asyncio import AsyncSession 
 from sqlalchemy.orm import selectinload
 from contextlib import asynccontextmanager
@@ -32,6 +32,17 @@ templates = Jinja2Templates(directory="templates")
 
 app.include_router(users.router , prefix = "/api/users" , tags = ["users"])
 app.include_router(posts.router , prefix = "/api/posts" , tags = ["posts"])
+
+@app.get("/health")
+async def health_check(db:Annotated[AsyncSession,Depends(get_db)]):
+    try :
+        await db.execute(text("SELECT 1"))
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail = "Database Unavailable",
+        ) from exc 
+    return {"status":"healthy"}
 
 #HTML routes are for human viewing and are NOT needed in API documentation therefore we use include_in_schema=False
 @app.get("/",include_in_schema=False,name="home")
