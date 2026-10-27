@@ -45,7 +45,7 @@ from PIL import UnidentifiedImageError
 from starlette.concurrency import run_in_threadpool 
 from image_utils import (
     process_profile_image , 
-    delete_profile_image ,
+    delete_profile_images ,
     upload_profile_image
     )
 from sqlalchemy import delete as sql_delete
@@ -359,7 +359,7 @@ async def delete_user(
     await db.commit()
 
     if old_filename:
-        await delete_profile_image(old_filename)
+        await delete_profile_images(old_filename)
 
 @router.patch("/{user_id}/picture",response_model=UserPrivate)
 async def upload_profile_picture(
@@ -404,7 +404,7 @@ async def upload_profile_picture(
     await db.refresh(current_user)
 
     if old_filename:
-        await delete_profile_image(old_filename)
+        await delete_profile_images(old_filename)
     
     return current_user
 
@@ -432,7 +432,7 @@ async def delete_user_picture(
     await db.commit()
     await db.refresh(current_user)
 
-    await delete_profile_image(old_filename)
+    await delete_profile_images(old_filename)
     
     return current_user
 
