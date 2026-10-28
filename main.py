@@ -96,12 +96,11 @@ async def user_posts_page(
     result = await db.execute(
         select(models.User)
         .where(models.User.id == user_id)
-        .order_by(models.Post.date_posted.desc())
         )
 
     user = result.scalars().first()
     if not user :
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,details="User not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="User not found")
 
     count_result = await db.execute(
         select(func.count())
